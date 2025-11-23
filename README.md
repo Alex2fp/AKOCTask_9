@@ -1,49 +1,50 @@
-# Signal-based Integer Transfer
+# AKOCTask_9
+# Передача целых чисел через сигналы
 
-This project provides two small C utilities for transferring 32-bit signed integers between two Unix-like processes using POSIX user signals:
+Проект содержит две небольшие C‑утилиты для обмена 32‑битными знаковыми целыми числами между двумя Unix‑подобными процессами с использованием пользовательских сигналов POSIX:
 
-- `sender`: sends an integer bit-by-bit to a receiver process and waits for per-bit acknowledgements.
-- `receiver`: rebuilds the integer from incoming signals and acknowledges each bit back to the sender.
+- `sender` — отправляет число побитно в процесс‑приёмник и ждёт подтверждение после каждого бита.
+- `receiver` — собирает число из входящих сигналов и подтверждает каждый бит отправителю.
 
-## Building
+## Сборка
 
-1. Ensure a POSIX-compatible environment with a C compiler (e.g., `gcc`) and standard development tools.
-2. Run `make` to build both binaries:
+1. Нужна POSIX‑совместимая среда, C‑компилятор (например, `gcc`) и стандартные инструменты разработки.
+2. Выполните сборку командой:
 
 ```sh
 make
 ```
 
-This produces the `sender` and `receiver` executables in the repository root.
+После этого в корне репозитория появятся исполняемые файлы `sender` и `receiver`.
 
-## Running
+## Запуск
 
-1. Start the receiver first. It prints its process ID so the sender can target it:
+1. Сначала запустите приёмник. Он выведет свой PID, чтобы на него можно было нацелить отправителя:
 
 ```sh
 ./receiver
 ```
 
-2. From another terminal, launch the sender with the receiver PID and the integer to transmit:
+2. В другом терминале запустите отправитель, указав PID приёмника и передаваемое целое число:
 
 ```sh
-./sender <receiver_pid> <integer>
+./sender <pid_приёмника> <целое_число>
 ```
 
-The sender transmits the integer bitwise using `SIGUSR1` (bit 0) and `SIGUSR2` (bit 1). The receiver acknowledges each bit; once 32 bits are reconstructed, it prints the received value and continues waiting for more messages.
+Отправитель передаёт биты числа с помощью `SIGUSR1` (бит 0) и `SIGUSR2` (бит 1). Приёмник подтверждает каждый бит; после сборки всех 32 бит выводит полученное значение и продолжает ждать новые сообщения.
 
-## Minimal file set for sharing
+## Какие файлы передавать
 
-To reproduce the project on another machine, include at least these files:
+Чтобы проект заработал на другом компьютере, лучше всего отправить комплект из четырёх файлов:
 
 - `sender.c`
 - `receiver.c`
 - `Makefile`
-- `README.md` (recommended so others know how to build/run)
+- `README.md` (удобно, чтобы получатель сразу увидел инструкции)
 
-With the Makefile and source files present, running `make` should rebuild the binaries on another POSIX system with a compatible C toolchain. Sharing only the two `.c` files is possible, but the recipient would need to compile manually (e.g., `gcc sender.c -o sender` and `gcc receiver.c -o receiver`) and might miss usage details; including the Makefile and README avoids that friction.
+Имея эти файлы, на другой POSIX‑системе с подходящим компилятором достаточно выполнить `make`, чтобы собрать обе программы. Если передать только два `.c`‑файла, проект тоже можно запустить, но получателю придётся собирать вручную (`gcc sender.c -o sender` и `gcc receiver.c -o receiver`) и он может не узнать нужные параметры запуска — поэтому Makefile и README экономят время.
 
-## Notes
+## Примечания
 
-- The programs rely solely on the standard C library and POSIX signals—no external dependencies are required.
-- Both sender and receiver remain running until terminated (e.g., with `Ctrl+C`). The receiver continuously accepts additional integers.
+- Утилиты используют только стандартную библиотеку C и POSIX‑сигналы, внешние зависимости отсутствуют.
+- Отправитель и приёмник работают до ручной остановки (например, `Ctrl+C`). Приёмник может принимать новые числа без перезапуска.
